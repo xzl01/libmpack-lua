@@ -1,5 +1,30 @@
-template-repository (1.0-1) unstable; urgency=medium
+libmpack-lua (1.0.7-2) unstable; urgency=medium
 
-  * Initial release
+  * control: Change Vcs-* to salsa.debian.org
+  * Bump debhelper compat to 11
+  * copyright: Use https URL for copyright Format
+  * Declare compliance with Policy 4.1.3
 
- -- Tsic404 <liuheng@deepin.org>  Sat, 28 Jan 2023 13:46:49 +0800
+ -- James McCoy <jamessan@debian.org>  Tue, 13 Mar 2018 22:58:16 -0400
+
+libmpack-lua (1.0.7-1) unstable; urgency=medium
+
+  * New upstream release
+  * Adjust defines specified in CLIB_CFLAGS according to upstream build
+    changes.
+  * Change Priority to optional
+  * Add Lintian override for package-name-doesnt-match-sonames
+  * Declare compliance with Policy 4.1.2
+
+ -- James McCoy <jamessan@debian.org>  Fri, 15 Dec 2017 08:58:53 -0500
+
+libmpack-lua (1.0.6-1) unstable; urgency=medium
+
+  * Initial release after being split out from src:libmpack.
+  * Cherry-pick upstream patches to allow using system libs
+    + Fix builds using gcc7 and/or system lua
+    + Allow linking against system libmpack
+  * Remove -pie from DEB_BUILD_MAINT_OPTIONS, due to the new semantics.
+  * debian/rules: Make upstream buildsystem link against system libmpack
+
+ -- James McCoy <jamessan@debian.org>  Mon, 24 Jul 2017 23:45:39 -0400
