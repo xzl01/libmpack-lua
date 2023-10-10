@@ -1,3 +1,9 @@
+libmpack-lua (1.0.11-0deepin) unsatble; urgency=medium
+
+  * New upstream release
+
+ -- xiangzelong <xiangzelong@deepin.org>  Tue, 10 Oct 2023 15:29:52 +0800
+
 libmpack-lua (1.0.7-2) unstable; urgency=medium
 
   * control: Change Vcs-* to salsa.debian.org

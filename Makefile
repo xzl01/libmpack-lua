@@ -17,7 +17,7 @@ LUA_URL ?= https://lua.org/ftp/lua-$(MPACK_LUA_VERSION).tar.gz
 LUAROCKS_URL ?= https://github.com/keplerproject/luarocks/archive/v2.2.0.tar.gz
 LUA_TARGET ?= linux
 MPACK_VERSION ?= 1.0.5
-MPACK_URL ?= https://github.com/tarruda/libmpack/archive/$(MPACK_VERSION).tar.gz
+MPACK_URL ?= https://github.com/libmpack/libmpack/archive/$(MPACK_VERSION).tar.gz
 LMPACK_VERSION != sed "/^local git_tag =/!d;s/[^']*'//;s/'\$$//;q" mpack-*.rockspec
 
 # deps location
@@ -41,7 +41,7 @@ CC ?= gcc
 PKG_CONFIG ?= pkg-config
 CFLAGS ?= -ansi -O0 -g3 -Wall -Wextra -Werror -Wconversion \
 	-Wstrict-prototypes -Wno-unused-parameter -pedantic
-CFLAGS += -fPIC -DMPACK_DEBUG_REGISTRY_LEAK
+CFLAGS += -fPIC -std=c99 -DMPACK_DEBUG_REGISTRY_LEAK
 ifeq ($(MPACK_LUA_VERSION_NOPATCH),5.3)
 # Lua 5.3 has integer type, which is not 64 bits for -ansi since c89 doesn't
 # have `long long` type.

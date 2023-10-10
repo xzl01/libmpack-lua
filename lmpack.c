@@ -15,9 +15,17 @@
  * compilation.
  */
 #define LUA_LIB
+/* for snprintf */
+#ifdef __APPLE__
+// Apple uses C99 source, not XOPEN
+#define _C99_SOURCE 1
+#else
+#define _XOPEN_SOURCE 500
+#endif
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <lauxlib.h>
 #include <lua.h>
@@ -200,9 +208,12 @@ static void lmpack_pushnil(lua_State *L)
 static mpack_uint32_t lmpack_objlen(lua_State *L, int *is_array)
 {
   size_t len, max;
-  int isarr, type, top;
+  int isarr, type;
   lua_Number n;
-  assert(top = lua_gettop(L));
+#ifndef NDEBUG
+  int top = lua_gettop(L);
+  assert(top);
+#endif
 
   if ((type = lua_type(L, -1)) != LUA_TTABLE) {
 #if LUA_VERSION_NUM >= 502
@@ -224,7 +235,7 @@ static mpack_uint32_t lmpack_objlen(lua_State *L, int *is_array)
   while (lua_next(L, -2)) {
     lua_pop(L, 1);  /* pop value */
     isarr = isarr
-      && lua_isnumber(L, -1)            /* lua number */
+      && lua_type(L, -1) == LUA_TNUMBER /* lua number */
       && (n = lua_tonumber(L, -1)) > 0  /* greater than 0 */
       && (size_t)n == n;                /* and integer */
     max = isarr && (size_t)n > max ? (size_t)n : max;
@@ -709,7 +720,12 @@ static void lmpack_unparse_enter(mpack_parser_t *parser, mpack_node_t *node)
       }
     /* Fallthrough */
     default:
-      luaL_error(L, "can't serialize object");
+	  {
+		/* #define FMT */
+		char errmsg[50];
+		snprintf(errmsg, 50, "can't serialize object of type %d", type);
+		luaL_error(L, errmsg);
+	  }
   }
 
 end:
@@ -901,6 +917,8 @@ static int lmpack_session_receive(lua_State *L)
     case MPACK_RPC_RESPONSE:
       lua_pushstring(L, "response");
       lmpack_geti(L, session->reg, (int)session->unpacked.msg.data.i);
+      lmpack_unref(L, session->reg, (int)session->unpacked.msg.data.i);
+      session->unpacked.msg.data.i = LUA_NOREF;
       break;
     case MPACK_RPC_NOTIFICATION:
       lua_pushstring(L, "notification");
@@ -1142,17 +1160,22 @@ int luaopen_mpack(lua_State *L)
   lua_setfield(L, -2, "__index");
   luaL_register(L, NULL, session_methods);
   /* NIL */
-  luaL_newmetatable(L, NIL_NAME);
-  lua_pushstring(L, "__tostring");
-  lua_pushcfunction(L, lmpack_nil_tostring);
-  lua_settable(L, -3);
-  /* Use a constant userdata to represent NIL */
-  (void)lua_newuserdata(L, sizeof(void *));
-  /* Assign the metatable to the userdata object */
-  luaL_getmetatable(L, NIL_NAME);
-  lua_setmetatable(L, -2);
-  /* Save NIL on the registry so we can access it easily from other functions */
-  lua_setfield(L, LUA_REGISTRYINDEX, NIL_NAME);
+  /* Check if NIL is already stored in the registry */
+  lua_getfield(L, LUA_REGISTRYINDEX, NIL_NAME);
+  /* If it isn't, create it */
+  if (lua_isnil(L, -1)) {
+    /* Use a constant userdata to represent NIL */
+    (void)lua_newuserdata(L, sizeof(void *));
+    /* Create a metatable for NIL userdata */
+    lua_createtable(L, 0, 1);
+    lua_pushstring(L, "__tostring");
+    lua_pushcfunction(L, lmpack_nil_tostring);
+    lua_settable(L, -3);
+    /* Assign the metatable to the userdata object */
+    lua_setmetatable(L, -2);
+    /* Save NIL on the registry so we can access it easily from other functions */
+    lua_setfield(L, LUA_REGISTRYINDEX, NIL_NAME);
+  }
   /* module */
   lua_newtable(L);
   luaL_register(L, NULL, mpack_functions);

@@ -1,4 +1,4 @@
-local git_tag = '1.0.7'
+local git_tag = '1.0.11'
 
 package = 'mpack'
 version = git_tag .. '-0'
@@ -9,7 +9,8 @@ source = {
 
 description = {
   summary = 'Lua binding to libmpack',
-  license = 'MIT'
+  license = 'MIT',
+  homepage = 'https://github.com/libmpack/libmpack-lua'
 }
 
 build = {
