@@ -1,3 +1,9 @@
+libmpack-lua (1.0.12-0deepin1) unstable; urgency=medium
+
+  *  New upstaream release.
+
+ -- xiangzelong <xiangzelong@deepin.org>  Tue, 07 Jan 2025 10:36:34 +0800
+
 libmpack-lua (1.0.11-0deepin) unsatble; urgency=medium
 
   * New upstream release
